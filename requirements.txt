@@ -1,0 +1,48 @@
+# Core LangChain
+langchain
+langchain-core
+langchain-community
+langchain-openai
+
+# Agent Framework
+langgraph
+
+# OpenAI
+openai
+
+# Search Tool
+tavily-python
+
+# Web Scraping
+beautifulsoup4
+lxml
+requests
+
+# Environment Variables
+python-dotenv
+
+# Data Validation
+pydantic
+
+# Token Counting
+tiktoken
+
+# Async Support
+aiohttp
+
+# FastAPI Backend (optional but recommended)
+fastapi
+uvicorn
+
+# Utilities
+tenacity
+httpx
+
+# Parsing & Data Handling
+pandas
+
+# Logging & Monitoring
+rich
+
+# Type Hints
+typing-extensions

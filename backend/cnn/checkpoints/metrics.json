@@ -1,0 +1,11 @@
+{
+  "val_acc": 0.9,
+  "n_train": 160,
+  "n_val": 40,
+  "vocab_size": 1140,
+  "max_len": 80,
+  "classes": {
+    "0": "unreliable",
+    "1": "reliable"
+  }
+}

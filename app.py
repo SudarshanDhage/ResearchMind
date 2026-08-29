@@ -1,6 +1,13 @@
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent / "backend"))
+
 import streamlit as st
 import time
-from agents import build_reader_agent, build_search_agent, writer_chain, critic_chain
+from agents import build_reader_agent, build_search_agent, critique_report, write_report
+from cnn.filter import filter_for_writer
+from pipeline import last_text
 
 # ── Page config ──────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -375,7 +382,7 @@ with col_pipeline:
     def s(step):
         if not r:
             return "waiting"
-        steps = ["search", "reader", "writer", "critic"]
+        steps = ["search", "reader", "cnn", "writer", "critic"]
         idx = steps.index(step)
         completed = list(r.keys())
         # figure out which steps are done
@@ -390,8 +397,9 @@ with col_pipeline:
 
     step_card("01", "Search Agent",  s("search"), "Gathers recent web information")
     step_card("02", "Reader Agent",  s("reader"), "Scrapes & extracts deep content")
-    step_card("03", "Writer Chain",  s("writer"), "Drafts the full research report")
-    step_card("04", "Critic Chain",  s("critic"), "Reviews & scores the report")
+    step_card("03", "TextCNN Filter", s("cnn"), "Local CNN scores source reliability")
+    step_card("04", "Writer Chain",  s("writer"), "Drafts the report from CNN-approved text")
+    step_card("05", "Critic Chain",  s("critic"), "Reviews & scores the report")
 
 
 # ── Run pipeline ──────────────────────────────────────────────────────────────
@@ -414,7 +422,7 @@ if st.session_state.running and not st.session_state.done:
         sr = search_agent.invoke({
             "messages": [("user", f"Find recent, reliable and detailed information about: {topic_val}")]
         })
-        results["search"] = sr["messages"][-1].content
+        results["search"] = last_text(sr)
         st.session_state.results = dict(results)
     st.rerun() if False else None   # keep inline for now
 
@@ -428,26 +436,25 @@ if st.session_state.running and not st.session_state.done:
                 f"Search Results:\n{results['search'][:800]}"
             )]
         })
-        results["reader"] = rr["messages"][-1].content
+        results["reader"] = last_text(rr)
         st.session_state.results = dict(results)
 
-    # ── Step 3: Writer ──
-    with st.spinner("✍️  Writer is drafting the report…"):
-        research_combined = (
-            f"SEARCH RESULTS:\n{results['search']}\n\n"
-            f"DETAILED SCRAPED CONTENT:\n{results['reader']}"
+    # ── Step 3: TextCNN ──
+    with st.spinner("CNN is scoring source quality…"):
+        research_combined, cnn = filter_for_writer(
+            topic_val, results["search"], results["reader"]
         )
-        results["writer"] = writer_chain.invoke({
-            "topic": topic_val,
-            "research": research_combined
-        })
+        results["cnn"] = cnn["summary"]
         st.session_state.results = dict(results)
 
-    # ── Step 4: Critic ──
+    # ── Step 4: Writer ──
+    with st.spinner("✍️  Writer is drafting the report…"):
+        results["writer"] = write_report(topic_val, research_combined)
+        st.session_state.results = dict(results)
+
+    # ── Step 5: Critic ──
     with st.spinner("🧐  Critic is reviewing the report…"):
-        results["critic"] = critic_chain.invoke({
-            "report": results["writer"]
-        })
+        results["critic"] = critique_report(results["writer"])
         st.session_state.results = dict(results)
 
     st.session_state.running = False
@@ -472,6 +479,10 @@ if r:
         with st.expander("📄 Scraped Content (raw)", expanded=False):
             st.markdown(f'<div class="result-panel"><div class="result-panel-title">Reader Agent Output</div>'
                         f'<div class="result-content">{r["reader"]}</div></div>', unsafe_allow_html=True)
+
+    if "cnn" in r:
+        with st.expander("TextCNN source filter", expanded=True):
+            st.markdown(r["cnn"])
 
     # Final report
     if "writer" in r:

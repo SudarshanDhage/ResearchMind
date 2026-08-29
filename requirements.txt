@@ -7,7 +7,7 @@ langchain-openai
 # Agent Framework
 langgraph
 
-# OpenAI
+# LLM (OpenAI-compatible client — used with DeepSeek API)
 openai
 
 # Search Tool
@@ -30,9 +30,12 @@ tiktoken
 # Async Support
 aiohttp
 
-# FastAPI Backend (optional but recommended)
+# FastAPI Backend
 fastapi
 uvicorn
+
+# Optional Streamlit UI
+streamlit
 
 # Utilities
 tenacity
@@ -46,3 +49,6 @@ rich
 
 # Type Hints
 typing-extensions
+
+# Local TextCNN source-quality classifier
+torch

@@ -29,10 +29,13 @@ async def lifespan(_app: FastAPI):
 
 app = FastAPI(title="ResearchMind API", version="1.0.0", lifespan=lifespan)
 
+_origins = _allowed_origins()
+_allow_all = "*" in _origins
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=_allowed_origins(),
-    allow_credentials=True,
+    allow_origins=["*"] if _allow_all else _origins,
+    allow_credentials=not _allow_all,
     allow_methods=["*"],
     allow_headers=["*"],
 )

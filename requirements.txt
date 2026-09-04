@@ -15,7 +15,7 @@ tavily-python
 
 # Web Scraping
 beautifulsoup4
-lxml
+# lxml optional — BeautifulSoup uses html.parser by default
 requests
 
 # Environment Variables

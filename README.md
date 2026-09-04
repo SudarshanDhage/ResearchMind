@@ -27,7 +27,7 @@ ResearchMind runs a five-stage pipeline:
 ## Architecture
 
 ```
-multi-ai-agent-research-assistant/
+ResearchMind/
 ├── backend/
 │   ├── main.py        FastAPI REST API
 │   ├── pipeline.py    Five-stage runner (includes CNN)

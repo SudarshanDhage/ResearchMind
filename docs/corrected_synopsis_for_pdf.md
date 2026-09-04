@@ -1,7 +1,7 @@
 # Corrected Synopsis Text for PDF Report
 
 Use this content to replace the mismatched sections in **AI-Driven Multi-Agent(2).pdf**.
-It matches what is actually built in the `multi-ai-agent-research-assistant` project.
+It matches what is actually built in the `ResearchMind` project.
 
 ---
 
